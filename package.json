@@ -1,0 +1,13 @@
+{
+  "name": "minskjs-graphics",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "serve": "browser-sync start --server",
+    "watch": "pulp -w --then \"browser-sync reload\" browserify --to app.js --censor-lib",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
