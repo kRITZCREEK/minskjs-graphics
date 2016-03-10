@@ -2,38 +2,62 @@ module Main where
 
 import Prelude
 import Control.Monad.Eff (Eff)
-import Data.Array ((..), snoc)
-import Data.Foldable (fold, foldMap, maximum)
+import Data.Array ((..), snoc, filter)
+import Data.Foldable (fold, foldMap, maximum, any)
 import Data.Int (toNumber)
-import Data.Maybe (Maybe(Just), maybe)
+import Data.Maybe (Maybe(Just))
 import Data.Monoid (mempty)
 import Data.Ord (max)
+
+import Math
 
 import Graphics.Canvas (getCanvasElementById, getContext2D, Context2D, Canvas)
 import Graphics.Drawing (Drawing, scale, translate)
 import Graphics.Pixel (enemy, ship, bullet, renderClean)
 
-import Signal
+import Signal ((<~), runSignal, foldp, (~), sampleOn)
 import Signal.Time (every)
 import Signal.Keyboard
 
 type Player = Int
-type Bullet = { x :: Int, y :: Int }
-type State = { player :: Player, bullets :: Array Bullet, cooldown :: Int }
-type Input = { movement :: Int, fire :: Boolean }
+type Enemy = Int
+type Bullet =
+  { x :: Int
+  , y :: Int
+  }
+type State =
+  { player :: Player
+  , enemies :: Array Enemy
+  , bullets :: Array Bullet
+  , cooldown :: Int
+  }
+type Input =
+  { movement :: Int
+  , fire :: Boolean
+  }
 
 initialState :: State
-initialState = {player: 46, bullets: [], cooldown: 0}
+initialState =
+  { player: 46
+  , enemies: map (15 * _) (1..5)
+  , bullets: []
+  , cooldown: 0
+  }
 
 newBullet :: Int -> Bullet
 newBullet x = {x, y: 50}
 
 moveBullet :: Bullet -> Bullet
-moveBullet b = b { y = b.y - 1}
+moveBullet {x, y} = { x, y: y - 1 }
+
+collides :: Enemy -> Bullet -> Boolean
+collides e {x, y} = dist y 0 < 10.0 && dist e x < 4.0
+  where dist f g = Math.abs (toNumber (f - g))
 
 step :: Input -> State -> State
-step {movement, fire} {player, bullets, cooldown} =
+step {movement, fire} {player, enemies, bullets, cooldown} =
   let newPlayer = player + movement
+      newEnemies = filter (\e -> not $ any (collides e) bullets) enemies
       newBullets =
         map moveBullet bullets ++ if firing
                                   then [newBullet (player + 4)]
@@ -44,18 +68,19 @@ step {movement, fire} {player, bullets, cooldown} =
                     else max 0 (cooldown - 1)
 
   in { player: newPlayer
+     , enemies: newEnemies
      , bullets: newBullets
      , cooldown: newCooldown
      }
 
 renderState :: State -> Drawing
-renderState {player, bullets} =
-  let enemies = foldMap renderEnemy (1..5)
+renderState {player, bullets, enemies} =
+  let enemies' = foldMap renderEnemy enemies
       player' = translate (toNumber player) 50.0 ship
       bullets' = foldMap renderBullet bullets
       renderBullet {x, y} = translate (toNumber x) (toNumber y) bullet
-      renderEnemy x = translate (toNumber x * 15.0) 0.0 enemy
-  in enemies <> bullets' <> player'
+      renderEnemy x = translate (toNumber x) 0.0 enemy
+  in enemies' <> bullets' <> player'
 
 input :: Boolean -> Boolean -> Boolean -> {movement :: Int, fire :: Boolean}
 input true false fire  = {movement: -1, fire}

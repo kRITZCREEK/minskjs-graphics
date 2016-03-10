@@ -24,7 +24,7 @@ pixelArt lines =
   in foldMap (uncurry pixelLine) (zip (1 .. maxY) grid)
 
 enemy :: Drawing
-enemy = fillBlack $ pixelArt $
+enemy = translate (negate 5.0) 0.0 $ fillBlack $ pixelArt $
   [ "   x     x   "
   , "    x   x    "
   , "   xxxxxxx   "
