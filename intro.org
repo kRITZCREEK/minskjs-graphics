@@ -1,0 +1,27 @@
+* Graphics with PureScript
+
+  Using Functional Programming for fun!
+
+      #     #        #     #  
+       #   #          #   #
+      #######    #   #######   #
+     ## ### ##    # ## ### ## #
+    ###########    ###########
+    # ####### #      #######  
+    # #     # #      #     #  
+       ## ##          ## ##
+
+* Who am I?
+
+  Christoph Hegemann from Germany
+
+  I'm passionate for functional programming and the web. 
+
+* Contact
+
+*** Twitter: @kritzcreek
+
+*** Github: kRITZCREEK
+
+* Livecoding
+
