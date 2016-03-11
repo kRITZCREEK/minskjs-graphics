@@ -91,16 +91,16 @@ input false true fire  = {movement:  1, fire}
 view :: forall e. Context2D -> State -> Eff (canvas :: Canvas | e) Unit
 view ctx state =
   renderClean ctx $
-    translate 150.0 150.0 $
+    translate 50.0 150.0 $
       scale 5.0 5.0 $
         renderState state
 
 main = do
   Just canvas <- getCanvasElementById "canvas"
   ctx <- getContext2D canvas
-  rArrow <- rightArrow
-  lArrow <- leftArrow
   sbar <- spacebar
+  lArrow <- leftArrow
+  rArrow <- rightArrow
 
   let inputs = sampleOn (every 20.0) (input <~ lArrow ~ rArrow ~ sbar)
       states = foldp step initialState inputs
